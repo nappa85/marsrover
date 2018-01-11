@@ -1,0 +1,11 @@
+[package]
+name = "marsrover"
+version = "0.1.0"
+authors = ["Marco Napetti <marco.napetti@pixartprinting.com>"]
+
+[dependencies]
+sphericalmercator = { git = "https://github.com/nappa85/rust-sphericalmercator.git" }
+futures = "0.1.14"
+hyper = "0.11.2"
+regex = "0.2"
+lazy_static = "1.0.0"
