@@ -109,3 +109,39 @@ impl ToString for MarsRover {
 		format!("position: {} {}\ndirection: {}", self.position.x, self.position.y, self.direction.to_string())
 	}
 }
+
+#[cfg(test)]
+mod tests {
+	use super::{Coordinate, Directions, MarsRover, MOVEMENT, sphericalmercator};
+
+	#[test]
+	fn movement() {
+		let mut rover = MarsRover::new();
+		assert_eq!((0f64, 0f64), (rover.position.x, rover.position.y));
+		assert_eq!(Directions::N, rover.direction);
+		assert_eq!(rover.forward(), Ok(Coordinate {x: 0f64, y: MOVEMENT}));
+		assert_eq!(rover.left(), Ok(Coordinate {x: 0f64, y: MOVEMENT}));
+		assert_eq!(rover.backward(), Ok(Coordinate {x: MOVEMENT, y: MOVEMENT}));
+		assert_eq!(rover.right(), Ok(Coordinate {x: MOVEMENT, y: MOVEMENT}));
+		assert_eq!(rover.backward(), Ok(Coordinate {x: MOVEMENT, y: 0f64}));
+	}
+
+	#[test]
+	fn wrapping() {
+		let mut rover = MarsRover::new();
+		rover.position.x = sphericalmercator::MAXEXTENT;
+		rover.position.y = sphericalmercator::MAXEXTENT;
+		assert_eq!((sphericalmercator::MAXEXTENT, sphericalmercator::MAXEXTENT), (rover.position.x, rover.position.y));
+		assert_eq!(Directions::N, rover.direction);
+		assert_eq!(rover.forward(), Ok(Coordinate {x: 0f64, y: -10659954.421478253}));
+	}
+
+	#[test]
+	fn obstacle() {
+		let mut rover = MarsRover::new();
+		rover.position.x = -10659954.353273375;
+		rover.position.y = 10659954f64;
+		rover.direction = Directions::E;
+		assert_eq!(rover.forward(), Err("Obstacle detected, aborting!".to_owned()));
+	}
+}

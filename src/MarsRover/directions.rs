@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-#[derive(PartialEq)]
+#[derive(Debug,PartialEq)]
 pub enum Directions {
 	N,
 	S,
