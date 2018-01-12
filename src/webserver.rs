@@ -26,13 +26,17 @@ impl Service for WebServer {
 	fn call(&self, req: Request) -> Self::Future {
 		match (req.method(), req.path()) {
 			(&Method::Post, "/move") => {
+				//concat every request's body chunk
 				Box::new(req.body().concat2().map(|chunks| {
+					//convert chunks to String
 					let body = String::from_utf8(chunks.to_vec()).unwrap();
 
+					//retrieve Rover singleton
 					let temp = ROVER.clone();
 					let mut rover = temp.lock().unwrap();
 					let mut result: Result<Coordinate, String>;
 
+					//treat String as Vec<char>
 					for command in body.chars() {
 						match command {
 							'f' => result = rover.forward(),
@@ -47,7 +51,7 @@ impl Service for WebServer {
 						match result {
 							Ok(_) => {},
 							Err(error) => {
-								return Response::new().with_body("Error: ".to_owned() + &error);
+								return Response::new().with_body("Error: ".to_owned() + &error + "\n" + &rover.to_string());
 							}
 						}
 					}

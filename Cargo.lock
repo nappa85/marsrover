@@ -297,7 +297,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "sphericalmercator"
 version = "0.1.0"
-source = "git+https://github.com/nappa85/rust-sphericalmercator.git#b5824fcc46a536240edd847e717d5750a3f3e4d7"
+source = "git+https://github.com/nappa85/rust-sphericalmercator.git#dfd119f651e2ef96d5027b307e0a1bbba295cbc7"
 
 [[package]]
 name = "take"

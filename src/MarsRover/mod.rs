@@ -6,8 +6,10 @@ use self::sphericalmercator::Coordinate;
 
 use self::directions::Directions as Directions;
 
+use std::f64;
+
 //degrees equivalent to 1km on mars surface
-const MOVEMENT:f64 = 0.02712621553502488;
+const MOVEMENT:f64 = 360000.0 / (2.0 * f64::consts::PI * sphericalmercator::A);
 
 #[derive(Default, PartialEq)]
 pub struct MarsRover {
@@ -22,7 +24,7 @@ impl MarsRover {
 
 	pub fn forward(&mut self) -> Result<Coordinate, String> {
 		if self.check_for_obstacles(&self.direction) {
-			return Err("Obstacle detected, aborting".to_owned());
+			return Err("Obstacle detected, aborting!".to_owned());
 		}
 
 		match self.direction {
@@ -32,17 +34,14 @@ impl MarsRover {
 			Directions::W => self.position.x -= MOVEMENT,
 		}
 
+		self.check_edge_wrapping();
+
 		Ok(self.position)
 	}
 
 	pub fn backward(&mut self) -> Result<Coordinate, String> {
-		if self.check_for_obstacles(match self.direction {
-			Directions::N => &Directions::S,
-			Directions::S => &Directions::N,
-			Directions::E => &Directions::W,
-			Directions::W => &Directions::E,
-		}) {
-			return Err("Obstacle detected, aborting".to_owned());
+		if self.check_for_obstacles(&self.direction.opposite()) {
+			return Err("Obstacle detected, aborting!".to_owned());
 		}
 
 		match self.direction {
@@ -52,27 +51,19 @@ impl MarsRover {
 			Directions::W => self.position.x += MOVEMENT,
 		}
 
+		self.check_edge_wrapping();
+
 		Ok(self.position)
 	}
 
 	pub fn left(&mut self) -> Result<Coordinate, String> {
-		self.direction = match self.direction {
-			Directions::N => Directions::W,
-			Directions::S => Directions::E,
-			Directions::E => Directions::N,
-			Directions::W => Directions::S,
-		};
+		self.direction = self.direction.left();
 
 		Ok(self.position)
 	}
 
 	pub fn right(&mut self) -> Result<Coordinate, String> {
-		self.direction = match self.direction {
-			Directions::N => Directions::E,
-			Directions::S => Directions::W,
-			Directions::E => Directions::S,
-			Directions::W => Directions::N,
-		};
+		self.direction = self.direction.right();
 
 		Ok(self.position)
 	}
@@ -90,10 +81,31 @@ impl MarsRover {
 
 		(x.sin() - y.cos()).abs() < 0.25
 	}
+
+	fn check_edge_wrapping(&mut self) {
+		//going north you'll find yourself going south on the opposite side
+		if self.position.y > sphericalmercator::MAXEXTENT {
+			self.position.x += sphericalmercator::MAXEXTENT;
+			self.position.y = -sphericalmercator::MAXEXTENT + (self.position.y - sphericalmercator::MAXEXTENT);
+			self.direction = self.direction.opposite();
+		}
+		if self.position.y < -sphericalmercator::MAXEXTENT {
+			self.position.x += sphericalmercator::MAXEXTENT;
+			self.position.y = sphericalmercator::MAXEXTENT + (self.position.y + sphericalmercator::MAXEXTENT);
+			self.direction = self.direction.opposite();
+		}
+		//going west you keep going west
+		if self.position.x > sphericalmercator::MAXEXTENT {
+			self.position.x = -sphericalmercator::MAXEXTENT + (self.position.x - sphericalmercator::MAXEXTENT);
+		}
+		if self.position.x < -sphericalmercator::MAXEXTENT {
+			self.position.x = sphericalmercator::MAXEXTENT + (self.position.x + sphericalmercator::MAXEXTENT);
+		}
+	}
 }
 
 impl ToString for MarsRover {
 	fn to_string(&self) -> String {
-		format!("position: {} {} direction: {}", self.position.x, self.position.y, self.direction.to_string())
+		format!("position: {} {}\ndirection: {}", self.position.x, self.position.y, self.direction.to_string())
 	}
 }

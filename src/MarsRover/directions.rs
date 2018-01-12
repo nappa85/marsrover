@@ -8,6 +8,35 @@ pub enum Directions {
 	W
 }
 
+impl Directions {
+	pub fn opposite(&self) -> Directions {
+		match *self {
+			Directions::N => Directions::S,
+			Directions::S => Directions::N,
+			Directions::E => Directions::W,
+			Directions::W => Directions::E,
+		}
+	}
+
+	pub fn left(&self) -> Directions {
+		match *self {
+			Directions::N => Directions::W,
+			Directions::S => Directions::E,
+			Directions::E => Directions::N,
+			Directions::W => Directions::S,
+		}
+	}
+
+	pub fn right(&self) -> Directions {
+		match *self {
+			Directions::N => Directions::E,
+			Directions::S => Directions::W,
+			Directions::E => Directions::S,
+			Directions::W => Directions::N,
+		}
+	}
+}
+
 impl Default for Directions {
 	fn default() -> Directions {
 		Directions::N
